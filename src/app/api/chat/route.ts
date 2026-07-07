@@ -1,31 +1,26 @@
-import { NextResponse } from "next/server";
-import type { ChatRequest, ChatResponse } from "@/app/types";
+import {
+  streamText,
+  type UIMessage,
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  toUIMessageStream,
+} from "ai";
+
+// ストリーミング応答のため実行時間の上限を少し伸ばす
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  let body: ChatRequest;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+  const { messages }: { messages: UIMessage[] } = await req.json();
 
-  const messages = body?.messages;
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ error: "messages is required" }, { status: 400 });
-  }
+  const result = streamText({
+    // Vercel AI Gateway 経由で Claude を利用（モデルは差し替え可能）
+    model: "anthropic/claude-sonnet-5",
+    system:
+      "あなたは親切で丁寧な日本語のアシスタントです。ユーザーの質問に簡潔で分かりやすく答えてください。",
+    messages: await convertToModelMessages(messages),
+  });
 
-  const lastUserMessage = [...messages]
-    .reverse()
-    .find((m) => m.role === "user");
-
-  // --- ここを実際のLLM呼び出しに差し替えてください ---
-  // 例: Vercel AI Gateway / AI SDK を使う場合は generateText() などに置き換える。
-  // 現状は動作確認用のエコー応答を返します。
-  const reply = lastUserMessage
-    ? `「${lastUserMessage.content}」というメッセージを受け取りました。`
-    : "何かメッセージを送ってください。";
-  // ----------------------------------------------------
-
-  const response: ChatResponse = { reply };
-  return NextResponse.json(response);
+  return createUIMessageStreamResponse({
+    stream: toUIMessageStream({ stream: result.stream }),
+  });
 }
