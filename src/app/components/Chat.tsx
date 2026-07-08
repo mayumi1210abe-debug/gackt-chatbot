@@ -35,12 +35,20 @@ export default function Chat() {
     <div className="mx-auto flex h-[100dvh] w-full max-w-2xl flex-col">
       <header className="flex items-center justify-between border-b border-black/10 px-4 py-3 dark:border-white/10">
         <h1 className="text-lg font-semibold">チャットボット</h1>
-        <Link
-          href="/dashboard"
-          className="text-sm text-black/50 underline underline-offset-2 hover:text-black/80 dark:text-white/50 dark:hover:text-white/80"
-        >
-          ダッシュボード
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            href="/entry"
+            className="text-sm text-black/50 underline underline-offset-2 hover:text-black/80 dark:text-white/50 dark:hover:text-white/80"
+          >
+            会員登録
+          </Link>
+          <Link
+            href="/dashboard"
+            className="text-sm text-black/50 underline underline-offset-2 hover:text-black/80 dark:text-white/50 dark:hover:text-white/80"
+          >
+            ダッシュボード
+          </Link>
+        </div>
       </header>
 
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-6">
