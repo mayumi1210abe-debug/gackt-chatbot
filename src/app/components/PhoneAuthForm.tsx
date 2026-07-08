@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import RegistrationChat from "./RegistrationChat";
 
 type Step = "phone" | "code" | "done";
 
@@ -21,7 +22,6 @@ export default function PhoneAuthForm() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
-  const [isNewMember, setIsNewMember] = useState(false);
 
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
@@ -42,8 +42,7 @@ export default function PhoneAuthForm() {
     setError(null);
     setIsBusy(true);
     try {
-      const result = await postJson("/api/auth/verify-code", { phoneNumber, code });
-      setIsNewMember(result.isNewMember);
+      await postJson("/api/auth/verify-code", { phoneNumber, code });
       setStep("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました。");
@@ -53,13 +52,7 @@ export default function PhoneAuthForm() {
   }
 
   if (step === "done") {
-    return (
-      <p className="text-sm text-black/70 dark:text-white/70">
-        {isNewMember
-          ? "本人確認が完了しました。会員登録の続き(国・地域・性別・生年)は Lesson 2-4 で実装予定です。"
-          : "本人確認が完了しました。おかえりなさい。"}
-      </p>
-    );
+    return <RegistrationChat />;
   }
 
   return (

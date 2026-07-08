@@ -1,4 +1,5 @@
 import { verifyOtp, OtpError } from "@/lib/otp";
+import { createSessionToken, SESSION_COOKIE_MAX_AGE } from "@/lib/session";
 
 export async function POST(req: Request) {
   const { phoneNumber, code } = await req.json();
@@ -9,7 +10,15 @@ export async function POST(req: Request) {
 
   try {
     const result = await verifyOtp(phoneNumber, code);
-    return Response.json({ success: true, ...result });
+    const token = createSessionToken(phoneNumber);
+    return Response.json(
+      { success: true, ...result },
+      {
+        headers: {
+          "Set-Cookie": `session=${token}; HttpOnly; Path=/; Max-Age=${SESSION_COOKIE_MAX_AGE}; SameSite=Lax`,
+        },
+      },
+    );
   } catch (err) {
     if (err instanceof OtpError) {
       return Response.json({ error: err.message }, { status: 400 });
