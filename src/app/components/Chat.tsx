@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import type { ChatMessage } from "../api/chat/route";
+import Link from "next/link";
+import type { ChatMessage } from "@/lib/classification";
 
 const CATEGORY_STYLES: Record<string, string> = {
   予約: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
@@ -32,8 +33,14 @@ export default function Chat() {
 
   return (
     <div className="mx-auto flex h-[100dvh] w-full max-w-2xl flex-col">
-      <header className="border-b border-black/10 px-4 py-3 dark:border-white/10">
+      <header className="flex items-center justify-between border-b border-black/10 px-4 py-3 dark:border-white/10">
         <h1 className="text-lg font-semibold">チャットボット</h1>
+        <Link
+          href="/dashboard"
+          className="text-sm text-black/50 underline underline-offset-2 hover:text-black/80 dark:text-white/50 dark:hover:text-white/80"
+        >
+          ダッシュボード
+        </Link>
       </header>
 
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-6">

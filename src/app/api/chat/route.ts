@@ -2,12 +2,13 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import {
   streamText,
   generateObject,
-  type UIMessage,
   type ToolSet,
   convertToModelMessages,
   createUIMessageStreamResponse,
   toUIMessageStream,
 } from "ai";
+import { sql } from "@/lib/db";
+import { CATEGORIES, type Category, type ChatMessage } from "@/lib/classification";
 
 // ストリーミング応答のため実行時間の上限を少し伸ばす
 export const maxDuration = 30;
@@ -15,11 +16,6 @@ export const maxDuration = 30;
 const anthropic = createAnthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
-
-export const CATEGORIES = ["予約", "料金", "クレーム", "その他"] as const;
-export type Category = (typeof CATEGORIES)[number];
-
-export type ChatMessage = UIMessage<{ category?: Category }>;
 
 async function classifyMessage(text: string): Promise<Category> {
   const { object } = await generateObject({
@@ -42,6 +38,12 @@ export async function POST(req: Request) {
     .join("") ?? "";
 
   const category = lastUserText ? await classifyMessage(lastUserText) : undefined;
+
+  if (category) {
+    sql`INSERT INTO chat_classifications (category) VALUES (${category})`.catch(
+      (err) => console.error("Failed to record classification", err),
+    );
+  }
 
   const result = streamText({
     // Anthropic API を直接利用
