@@ -1,7 +1,9 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import {
   streamText,
+  generateObject,
   type UIMessage,
+  type ToolSet,
   convertToModelMessages,
   createUIMessageStreamResponse,
   toUIMessageStream,
@@ -14,8 +16,32 @@ const anthropic = createAnthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+export const CATEGORIES = ["予約", "料金", "クレーム", "その他"] as const;
+export type Category = (typeof CATEGORIES)[number];
+
+export type ChatMessage = UIMessage<{ category?: Category }>;
+
+async function classifyMessage(text: string): Promise<Category> {
+  const { object } = await generateObject({
+    model: anthropic("claude-haiku-4-5"),
+    output: "enum",
+    enum: [...CATEGORIES],
+    system:
+      "あなたはチャット内容を分類する担当です。ユーザーのメッセージ内容から最も当てはまるカテゴリを1つ選んでください。",
+    prompt: text,
+  });
+  return object;
+}
+
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json();
+  const { messages }: { messages: ChatMessage[] } = await req.json();
+
+  const lastUserText = messages
+    .findLast((message) => message.role === "user")
+    ?.parts.map((part) => (part.type === "text" ? part.text : ""))
+    .join("") ?? "";
+
+  const category = lastUserText ? await classifyMessage(lastUserText) : undefined;
 
   const result = streamText({
     // Anthropic API を直接利用
@@ -26,6 +52,9 @@ export async function POST(req: Request) {
   });
 
   return createUIMessageStreamResponse({
-    stream: toUIMessageStream({ stream: result.stream }),
+    stream: toUIMessageStream<ToolSet, ChatMessage>({
+      stream: result.stream,
+      messageMetadata: () => (category ? { category } : undefined),
+    }),
   });
 }

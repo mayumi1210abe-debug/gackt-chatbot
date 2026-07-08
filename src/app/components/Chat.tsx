@@ -2,10 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import type { ChatMessage } from "../api/chat/route";
+
+const CATEGORY_STYLES: Record<string, string> = {
+  予約: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  料金: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  クレーム: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+  その他: "bg-black/10 text-black/60 dark:bg-white/15 dark:text-white/60",
+};
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status, error, stop } = useChat();
+  const { messages, sendMessage, status, error, stop } = useChat<ChatMessage>();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const isBusy = status === "submitted" || status === "streaming";
@@ -39,12 +47,20 @@ export default function Chat() {
           const text = message.parts
             .map((part) => (part.type === "text" ? part.text : ""))
             .join("");
+          const category = message.metadata?.category;
 
           return (
             <div
               key={message.id}
-              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
             >
+              {category && (
+                <span
+                  className={`mb-1 rounded-full px-2 py-0.5 text-xs font-medium ${CATEGORY_STYLES[category]}`}
+                >
+                  {category}
+                </span>
+              )}
               <div
                 className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
                   message.role === "user"
