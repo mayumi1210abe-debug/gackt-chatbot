@@ -6,9 +6,9 @@ import Link from "next/link";
 import type { ChatMessage } from "@/lib/classification";
 
 const CATEGORY_STYLES: Record<string, string> = {
-  予約: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-  料金: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  クレーム: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+  問い合わせ: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  チケット希望: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  告知反応: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
   その他: "bg-black/10 text-black/60 dark:bg-white/15 dark:text-white/60",
 };
 
