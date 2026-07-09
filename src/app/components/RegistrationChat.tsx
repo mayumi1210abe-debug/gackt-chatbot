@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { GENDERS, type RegistrationField } from "@/lib/registration";
+import MemberInquiryForm from "./MemberInquiryForm";
 
 const COUNTRIES = [
   "日本",
@@ -64,9 +65,12 @@ export default function RegistrationChat() {
 
   if (nextField === null) {
     return (
-      <p className="text-sm text-black/70 dark:text-white/70">
-        登録情報の入力が完了しています。ようこそ!
-      </p>
+      <div className="flex w-full flex-col gap-4">
+        <p className="text-sm text-black/70 dark:text-white/70">
+          登録情報の入力が完了しています。ようこそ!
+        </p>
+        <MemberInquiryForm />
+      </div>
     );
   }
 
