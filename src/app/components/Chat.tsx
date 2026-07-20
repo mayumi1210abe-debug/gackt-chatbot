@@ -62,19 +62,17 @@ export default function Chat() {
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          backgroundImage: `url('https://gackt.com/s3/skiyaki/uploads/link/image/12892/logo-1.png')`,
+          backgroundImage: `url('https://gackt.com/s3/skiyaki/uploads/link/image/75348/GACKT_2604_Main_header_GACKTcom_A.jpg')`,
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "right center",
-          backgroundSize: "contain",
-          opacity: 0.08,
+          backgroundPosition: "center center",
+          backgroundSize: "cover",
         }}
       />
-      {/* 赤グラデーションオーバーレイ */}
+      {/* 暗赤色オーバーレイ */}
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          background:
-            "radial-gradient(ellipse at 80% 50%, rgba(180,0,0,0.18) 0%, transparent 70%)",
+          background: "rgba(10,0,0,0.72)",
         }}
       />
 
