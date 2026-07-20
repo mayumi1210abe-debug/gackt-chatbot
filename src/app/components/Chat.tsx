@@ -14,6 +14,7 @@ const CATEGORY_STYLES: Record<string, string> = {
 
 export default function Chat() {
   const [input, setInput] = useState("");
+  const [isComposing, setIsComposing] = useState(false);
   const { messages, sendMessage, status, error, stop } = useChat<ChatMessage>();
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +115,14 @@ export default function Chat() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={() => setIsComposing(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !isComposing) {
+              e.preventDefault();
+              handleSubmit(e as unknown as React.FormEvent);
+            }
+          }}
           placeholder="メッセージを入力…"
           className="flex-1 rounded-full border border-black/15 bg-transparent px-4 py-2 text-sm outline-none focus:border-blue-500 dark:border-white/20"
         />
