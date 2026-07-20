@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Chatbot",
-  description: "シンプルなチャットボット",
+  title: "GACKT AI多言語チャットボット窓口",
+  description: "GACKT AI多言語チャットボット窓口",
 };
 
 export default function RootLayout({

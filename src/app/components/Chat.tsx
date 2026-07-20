@@ -3,19 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import Link from "next/link";
+import Image from "next/image";
 import type { ChatMessage } from "@/lib/classification";
+import { LANGUAGES, type LanguageCode } from "@/lib/classification";
 
-const CATEGORY_STYLES: Record<string, string> = {
-  問い合わせ: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-  チケット希望: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  告知反応: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
-  その他: "bg-black/10 text-black/60 dark:bg-white/15 dark:text-white/60",
-};
+const QUICK_ACTIONS = [
+  { label: "代表作を\n教えて", message: "GACKTの代表作を教えてください" },
+  { label: "問い合わせ\n方法", message: "お問い合わせ方法を教えてください" },
+];
 
 export default function Chat() {
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
-  const { messages, sendMessage, status, error, stop } = useChat<ChatMessage>();
+  const [selectedLang, setSelectedLang] = useState<LanguageCode>("ja");
+  const { messages, sendMessage, status, error, stop, setMessages } = useChat<ChatMessage>();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const isBusy = status === "submitted" || status === "streaming";
@@ -24,126 +25,219 @@ export default function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, status]);
 
+  // 初回ウェルカムメッセージ
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          parts: [{ type: "text", text: "GACKT OFFICIALスタッフです。チケット・ライブ・最新情報など、お気軽にお問い合わせください。" }],
+          metadata: undefined,
+        },
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
     if (!text || isBusy) return;
-    sendMessage({ text });
+    sendMessage({ text, metadata: { language: selectedLang } });
     setInput("");
   }
 
+  function handleQuickAction(message: string) {
+    if (isBusy) return;
+    sendMessage({ text: message, metadata: { language: selectedLang } });
+  }
+
   return (
-    <div className="mx-auto flex h-[100dvh] w-full max-w-2xl flex-col">
-      <header className="flex items-center justify-between border-b border-black/10 px-4 py-3 dark:border-white/10">
-        <h1 className="text-lg font-semibold">チャットボット</h1>
-        <div className="flex gap-4">
-          <Link
-            href="/entry"
-            className="text-sm text-black/50 underline underline-offset-2 hover:text-black/80 dark:text-white/50 dark:hover:text-white/80"
-          >
-            会員登録
-          </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm text-black/50 underline underline-offset-2 hover:text-black/80 dark:text-white/50 dark:hover:text-white/80"
-          >
-            ダッシュボード
-          </Link>
+    <div
+      className="relative flex h-[100dvh] w-full flex-col overflow-hidden"
+      style={{ background: "#0a0a0a" }}
+    >
+      {/* 背景画像 */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url('https://gackt.com/s3/skiyaki/uploads/link/image/12892/logo-1.png')`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right center",
+          backgroundSize: "contain",
+          opacity: 0.08,
+        }}
+      />
+      {/* 赤グラデーションオーバーレイ */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at 80% 50%, rgba(180,0,0,0.18) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* ヘッダー */}
+      <header className="relative z-10 flex items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-3">
+          <Image
+            src="https://gackt.com/s3/skiyaki/uploads/link/image/12892/logo-1.png"
+            alt="GACKT"
+            width={90}
+            height={28}
+            className="object-contain brightness-0 invert"
+            unoptimized
+          />
+          <span className="text-xs font-light tracking-[0.3em] text-white/50">AI CHAT</span>
         </div>
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 text-xs font-semibold tracking-widest text-red-500 hover:text-red-400"
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+          DASHBOARD
+        </Link>
       </header>
 
-      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-6">
-        {messages.length === 0 && (
-          <p className="mt-10 text-center text-sm text-black/50 dark:text-white/50">
-            メッセージを送って会話を始めましょう。
-          </p>
-        )}
-
-        {messages.map((message) => {
-          const text = message.parts
-            .map((part) => (part.type === "text" ? part.text : ""))
-            .join("");
-          const category = message.metadata?.category;
-
-          return (
-            <div
-              key={message.id}
-              className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
-            >
-              {category && (
-                <span
-                  className={`mb-1 rounded-full px-2 py-0.5 text-xs font-medium ${CATEGORY_STYLES[category]}`}
-                >
-                  {category}
-                </span>
-              )}
-              <div
-                className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
-                  message.role === "user"
-                    ? "bg-blue-600 text-white"
-                    : "bg-black/5 text-black dark:bg-white/10 dark:text-white"
-                }`}
-              >
-                {text}
-              </div>
-            </div>
-          );
-        })}
-
-        {status === "submitted" && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl bg-black/5 px-4 py-2 text-sm text-black/50 dark:bg-white/10 dark:text-white/50">
-              考え中…
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <p className="text-center text-sm text-red-500">
-            エラーが発生しました。しばらくして再度お試しください。
-          </p>
-        )}
-
-        <div ref={bottomRef} />
+      {/* 言語タブ */}
+      <div className="relative z-10 flex justify-center gap-1 px-4 pb-3 overflow-x-auto">
+        {LANGUAGES.map(({ code, label }) => (
+          <button
+            key={code}
+            type="button"
+            onClick={() => setSelectedLang(code)}
+            className={`shrink-0 rounded-sm px-3 py-1.5 text-xs font-medium transition-all ${
+              selectedLang === code
+                ? "bg-red-600 text-white"
+                : "border border-white/20 text-white/60 hover:border-white/40 hover:text-white/80"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex gap-2 border-t border-black/10 px-4 py-3 dark:border-white/10"
-      >
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onCompositionStart={() => setIsComposing(true)}
-          onCompositionEnd={() => setIsComposing(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !isComposing) {
-              e.preventDefault();
-              handleSubmit(e as unknown as React.FormEvent);
+      {/* チャットエリア */}
+      <div className="relative z-10 flex-1 overflow-y-auto px-4 py-2">
+        <div className="mx-auto max-w-2xl space-y-4">
+          {messages.map((message) => {
+            const text = message.parts
+              .map((part) => (part.type === "text" ? part.text : ""))
+              .join("");
+
+            if (message.role === "assistant") {
+              return (
+                <div key={message.id} className="flex items-start gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white">
+                    G
+                  </div>
+                  <div
+                    className="max-w-[80%] rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-white/90"
+                    style={{ background: "rgba(255,255,255,0.07)" }}
+                  >
+                    {text}
+                  </div>
+                </div>
+              );
             }
-          }}
-          placeholder="メッセージを入力…"
-          className="flex-1 rounded-full border border-black/15 bg-transparent px-4 py-2 text-sm outline-none focus:border-blue-500 dark:border-white/20"
-        />
-        {isBusy ? (
+
+            return (
+              <div key={message.id} className="flex justify-end">
+                <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-red-700/80 px-4 py-3 text-sm leading-relaxed text-white">
+                  {text}
+                </div>
+              </div>
+            );
+          })}
+
+          {status === "submitted" && (
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white">
+                G
+              </div>
+              <div
+                className="rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-white/50"
+                style={{ background: "rgba(255,255,255,0.07)" }}
+              >
+                考え中…
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <p className="text-center text-xs text-red-400">
+              エラーが発生しました。しばらくして再度お試しください。
+            </p>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
+      </div>
+
+      {/* クイックアクションボタン */}
+      <div className="absolute right-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2">
+        {QUICK_ACTIONS.map((action) => (
           <button
+            key={action.label}
             type="button"
-            onClick={stop}
-            className="rounded-full bg-black/10 px-5 py-2 text-sm font-medium text-black transition hover:bg-black/20 dark:bg-white/15 dark:text-white"
+            onClick={() => handleQuickAction(action.message)}
+            disabled={isBusy}
+            className="rounded-xl bg-red-700 px-3 py-2 text-center text-xs font-medium leading-tight text-white shadow-lg transition hover:bg-red-600 disabled:opacity-50 whitespace-pre-line"
           >
-            停止
+            {action.label}
           </button>
-        ) : (
-          <button
-            type="submit"
-            disabled={!input.trim()}
-            className="rounded-full bg-blue-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            送信
-          </button>
-        )}
-      </form>
+        ))}
+      </div>
+
+      {/* 入力エリア */}
+      <div className="relative z-10 border-t border-white/10 px-4 py-3">
+        <div className="mx-auto max-w-2xl">
+          <form onSubmit={handleSubmit} className="flex items-end gap-2">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onCompositionStart={() => setIsComposing(true)}
+              onCompositionEnd={() => setIsComposing(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && !isComposing) {
+                  e.preventDefault();
+                  handleSubmit(e as unknown as React.FormEvent);
+                }
+              }}
+              placeholder="スタッフへお問い合わせ..."
+              rows={1}
+              className="flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-red-600/50"
+              style={{ maxHeight: "120px" }}
+              onInput={(e) => {
+                const el = e.currentTarget;
+                el.style.height = "auto";
+                el.style.height = `${el.scrollHeight}px`;
+              }}
+            />
+            {isBusy ? (
+              <button
+                type="button"
+                onClick={stop}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              >
+                ■
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={!input.trim()}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-700 text-white shadow transition hover:bg-red-600 disabled:opacity-40"
+              >
+                ▶
+              </button>
+            )}
+          </form>
+          <p className="mt-1.5 text-center text-[10px] text-white/20">
+            Shift+Enter で改行 / Enter で送信
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
