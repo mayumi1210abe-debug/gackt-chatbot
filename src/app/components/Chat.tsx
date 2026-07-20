@@ -62,7 +62,7 @@ export default function Chat() {
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          backgroundImage: `url('https://gackt.com/s3/skiyaki/uploads/link/image/75348/GACKT_2604_Main_header_GACKTcom_A.jpg')`,
+          backgroundImage: `url('/IMG_0892.jpeg')`,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center center",
           backgroundSize: "cover",
