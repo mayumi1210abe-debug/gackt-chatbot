@@ -14,7 +14,7 @@ const QUICK_ACTIONS = [
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const [isComposing, setIsComposing] = useState(false);
+  const isComposingRef = useRef(false);
   const [selectedLang, setSelectedLang] = useState<LanguageCode>("ja");
   const { messages, sendMessage, status, error, stop, setMessages } = useChat<ChatMessage>();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -197,10 +197,10 @@ export default function Chat() {
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onCompositionStart={() => setIsComposing(true)}
-              onCompositionEnd={() => setIsComposing(false)}
+              onCompositionStart={() => { isComposingRef.current = true; }}
+              onCompositionEnd={() => { isComposingRef.current = false; }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey && !isComposing) {
+                if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
                   e.preventDefault();
                   handleSubmit(e as unknown as React.FormEvent);
                 }
