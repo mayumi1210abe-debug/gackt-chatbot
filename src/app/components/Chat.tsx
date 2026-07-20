@@ -64,7 +64,7 @@ export default function Chat() {
         style={{
           backgroundImage: `url('/IMG_0892.jpeg')`,
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "center center",
+          backgroundPosition: "70% 20%",
           backgroundSize: "cover",
         }}
       />
@@ -72,7 +72,7 @@ export default function Chat() {
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          background: "rgba(10,0,0,0.72)",
+          background: "rgba(10,0,0,0.55)",
         }}
       />
 
