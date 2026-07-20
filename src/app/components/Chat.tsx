@@ -14,10 +14,10 @@ const QUICK_ACTIONS = [
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const isComposingRef = useRef(false);
   const [selectedLang, setSelectedLang] = useState<LanguageCode>("ja");
   const { messages, sendMessage, status, error, stop, setMessages } = useChat<ChatMessage>();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const isComposingRef = useRef(false);
 
   const isBusy = status === "submitted" || status === "streaming";
 
@@ -198,7 +198,7 @@ export default function Chat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onCompositionStart={() => { isComposingRef.current = true; }}
-              onCompositionEnd={() => { isComposingRef.current = false; }}
+              onCompositionEnd={() => { setTimeout(() => { isComposingRef.current = false; }, 100); }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
                   e.preventDefault();
