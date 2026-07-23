@@ -173,21 +173,6 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* クイックアクションボタン */}
-      <div className="absolute right-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2">
-        {QUICK_ACTIONS.map((action) => (
-          <button
-            key={action.label}
-            type="button"
-            onClick={() => handleQuickAction(action.message)}
-            disabled={isBusy}
-            className="rounded-xl bg-red-700 px-3 py-2 text-center text-xs font-medium leading-tight text-white shadow-lg transition hover:bg-red-600 disabled:opacity-50 whitespace-pre-line"
-          >
-            {action.label}
-          </button>
-        ))}
-      </div>
-
       {/* 入力エリア */}
       <div className="relative z-10 border-t border-white/10 px-4 py-3">
         <div className="mx-auto max-w-2xl">

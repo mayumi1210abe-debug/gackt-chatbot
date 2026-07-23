@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(vercel env *)",
+      "Read(//private/tmp/**)",
+      "Bash(kill 8895)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(curl -s -X POST https://gackt-chatbot-three.vercel.app/api/chat -H \"Content-Type: application/json\" -d '{\"messages\":[{\"id\":\"1\",\"role\":\"user\",\"content\":\"テスト\"}]}')",
+      "Bash(npm install *)",
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill -9)",
+      "Bash(curl -s -N -X POST http://localhost:3000/api/chat -H \"Content-Type: application/json\" -d '{\"messages\":[{\"id\":\"1\",\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"text\":\"こんにちは\"}]}]}' --max-time 15)",
+      "Bash(kill %1)",
+      "Bash(xxd)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(vercel --version)",
+      "Bash(vercel *)",
+      "Bash(curl *)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 *)",
+      "Bash(osascript *)"
+    ]
+  }
+}
